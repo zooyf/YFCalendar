@@ -17,15 +17,15 @@
 
 @property (nonatomic, strong) YFCalendarController *calendarController;
 
-@property (nonatomic, strong) TestViewController *testVC;
+@property (nonatomic, strong) YFTestController *testVC;
 
 @end
 
 @implementation ViewController
 
-- (TestViewController *)testVC {
+- (YFTestController *)testVC {
     if (!_testVC) {
-        _testVC = [TestViewController new];
+        _testVC = [YFTestController new];
     }
     return _testVC;
 }
@@ -43,6 +43,13 @@
         _pdtCalendarViewController.weekdayHeaderEnabled = YES;
         _pdtCalendarViewController.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeVeryShort;
         _pdtCalendarViewController.delegate = self;
+        NSDateComponents *dateComponents = [NSDateComponents new];
+        [dateComponents setDay:1];
+        [dateComponents setMonth:2];
+        [dateComponents setYear:2015];
+        NSDate *date = [[NSCalendar currentCalendar] dateFromComponents:dateComponents];
+        _pdtCalendarViewController.firstDate = date;
+        _pdtCalendarViewController.lastDate = [NSDate date];
     }
     return _pdtCalendarViewController;
 }
@@ -59,7 +66,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (IBAction)pushToPDTCalendarAction:(id)sender {
+- (IBAction)pushToPDTCalendarAction:(id)sender {    
     [self.navigationController pushViewController:self.pdtCalendarViewController animated:YES];
     
 }
