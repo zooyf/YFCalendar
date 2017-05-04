@@ -13,6 +13,7 @@ let YFCalendarWeekdayHeaderHeight   = CGFloat(20.0)
 
 private let kYFCalendarCellIdentifier               = "kYFCalendarCellIdentifier"
 private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderIdentifier"
+private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
 
 @objc class YFCalendarController : UIViewController
 {
@@ -21,6 +22,38 @@ private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderI
     lazy var testTitle: String = {
         return "Hello"
     }()
+    
+    private lazy var _firstDate: Date = { [unowned self] in
+//        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
+//        components.day = 1
+//        return self.calendar.date(from: components)!
+        return self.clamp(date: Date.init())
+    }()
+    var firstDate: Date {
+        get {
+            return _firstDate
+        }
+        set {
+            _firstDate = self.clamp(date: newValue)
+        }
+    }
+    
+    private lazy var _lastDate: Date = { [unowned self] in
+        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
+        components.day = -1
+        components.year = 1
+        self.lastDate = self.calendar.date(byAdding: components, to: self.firstDate)!
+        return self.lastDate
+        }()
+    var lastDate: Date {
+        get {
+            return _lastDate
+        }
+        set {
+            _lastDate = self.clamp(date: newValue)
+        }
+    }
+
     
     lazy var backgroundColor: UIColor = UIColor.white
     
@@ -33,7 +66,6 @@ private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderI
         overlayView.textColor = self.overlayTextColor
         overlayView.alpha = 0.0
         overlayView.textAlignment = .center
-        
         overlayView.translatesAutoresizingMaskIntoConstraints = false
         return UILabel()
     }()
@@ -59,6 +91,7 @@ private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderI
         }
     }
     
+    /// days per week
     lazy var daysPerWeek: UInt = { [unowned self] in
         /// Using class variable in lazy method, 'self.' has no code hits.
         let range = self.calendar.maximumRange(of: .weekday)
@@ -66,9 +99,10 @@ private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderI
     }()
     
     
+    /// calendar collection view
     fileprivate lazy var calendarView: UICollectionView = { [unowned self] in // 避免循环引用
-        let layout = UICollectionViewFlowLayout()
-        let view = UICollectionView(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height-64), collectionViewLayout: layout)
+        let layout = YFCalendarViewFlowLayout()
+        let view = UICollectionView(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height-64), collectionViewLayout: YFCalendarViewFlowLayout())
         view.clipsToBounds = false
         view.backgroundColor = UIColor.white
         view.showsHorizontalScrollIndicator = false
@@ -84,9 +118,6 @@ private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderI
         // layout
         let itemWidth = CGFloat(floorf(Float(UIScreen.main.bounds.size.width/7.0)))
         layout.itemSize = CGSize.init(width: itemWidth, height: itemWidth)
-        layout.minimumInteritemSpacing = CGFloat.leastNormalMagnitude
-        layout.minimumLineSpacing = CGFloat.leastNormalMagnitude
-        layout.headerReferenceSize = CGSize.init(width: 0, height: 30)
         
         return view
     }()
@@ -103,6 +134,9 @@ private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderI
         print(self.calendar)
         
         self.setupHeaderAndOverlayView()
+        print(self.firstDate)
+        print(self.lastDate)
+        
         
     }
     
@@ -170,5 +204,14 @@ fileprivate extension YFCalendarController {
         self.calendarView.contentInset = UIEdgeInsetsMake(weekdayHeaderHeight, 0, 0, 0);
     }
     
+}
+
+// MARK: - Calendar Calculations
+fileprivate extension YFCalendarController {
+    
+    func clamp(date: Date) -> Date {
+        let components = self.calendar.dateComponents(kYFCalendarUnitYMD, from: date)
+        return self.calendar.date(from: components)!
+    }
     
 }
