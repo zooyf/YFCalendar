@@ -18,17 +18,16 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
 @objc class YFCalendarController : UIViewController
 {
     
-    /// The test String to test
-    lazy var testTitle: String = {
-        return "Hello"
-    }()
+    // MARK: - default properties
     
-    private lazy var _firstDate: Date = { [unowned self] in
-//        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
-//        components.day = 1
-//        return self.calendar.date(from: components)!
-        return self.clamp(date: Date.init())
-    }()
+    /// Background color of the Calendar. This will also affect the value of the background color for the overlay view.
+    lazy var backgroundColor: UIColor = UIColor.white
+    
+    /// Text color for the overlay view (Month and Year when the user scrolls the calendar).
+    lazy var overlayTextColor: UIColor = UIColor.black
+    
+    private lazy var _firstDate: Date = self.createFirstDate()
+    /// first date of the calendar. 日历的起始日期.
     var firstDate: Date {
         get {
             return _firstDate
@@ -38,13 +37,8 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
         }
     }
     
-    private lazy var _lastDate: Date = { [unowned self] in
-        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
-        components.day = -1
-        components.year = 1
-        self.lastDate = self.calendar.date(byAdding: components, to: self.firstDate)!
-        return self.lastDate
-        }()
+    private lazy var _lastDate: Date = self.createLastDate()
+    /// last date of the calendar. 日历的结束日期.
     var lastDate: Date {
         get {
             return _lastDate
@@ -53,28 +47,6 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
             _lastDate = self.clamp(date: newValue)
         }
     }
-
-    
-    lazy var backgroundColor: UIColor = UIColor.white
-    
-    lazy var overlayTextColor: UIColor = UIColor.black
-    
-    lazy var overlayView: UILabel = { [unowned self] in
-        let overlayView = UILabel()
-        overlayView.backgroundColor = self.backgroundColor.withAlphaComponent(0.90)
-        overlayView.font = UIFont.boldSystemFont(ofSize: YFCalendarOverlaySize)
-        overlayView.textColor = self.overlayTextColor
-        overlayView.alpha = 0.0
-        overlayView.textAlignment = .center
-        overlayView.translatesAutoresizingMaskIntoConstraints = false
-        return UILabel()
-    }()
-    
-    lazy var weekdayHeaderView: YFCalendarWeekdayHeaderView = { [unowned self] in
-        var weekdayHeaderView = YFCalendarWeekdayHeaderView.init(calendar: self.calendar, weekdayTextType: YFCalendarWeekdayTextType.VeryShort)
-        weekdayHeaderView.frame = CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 20)
-        return weekdayHeaderView
-    }()
     
     /**
      *  The calendar used to generate the view.
@@ -91,37 +63,34 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
         }
     }
     
+    // MARK: - fileprivate properties
+    
     /// days per week
-    lazy var daysPerWeek: UInt = { [unowned self] in
-        /// Using class variable in lazy method, 'self.' has no code hits.
+    fileprivate lazy var daysPerWeek: UInt = {
+        [unowned self] in // Avoid strong recycle reference. 避免强引用循环.
+        // Using class variable in lazy method, 'self.' has no code hits.
         let range = self.calendar.maximumRange(of: .weekday)
         return UInt(range!.upperBound - range!.lowerBound)
     }()
     
-    
     /// calendar collection view
-    fileprivate lazy var calendarView: UICollectionView = { [unowned self] in // 避免循环引用
-        let layout = YFCalendarViewFlowLayout()
-        let view = UICollectionView(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height-64), collectionViewLayout: YFCalendarViewFlowLayout())
-        view.clipsToBounds = false
-        view.backgroundColor = UIColor.white
-        view.showsHorizontalScrollIndicator = false
-        
-        // register cell and section header
-        view.register(YFCalendarCell.self, forCellWithReuseIdentifier: kYFCalendarCellIdentifier)
-        view.register(YFCalendarSectionHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: kYFCalendarSectionHeaderIdentifier)
-        
-        // delegate and datasource
-        view.delegate = self
-        view.dataSource = self
-        
-        // layout
-        let itemWidth = CGFloat(floorf(Float(UIScreen.main.bounds.size.width/7.0)))
-        layout.itemSize = CGSize.init(width: itemWidth, height: itemWidth)
-        
-        return view
-    }()
+    fileprivate lazy var calendarView: UICollectionView = self.createCalendarView()
     
+    /// overlay floating view. 滑动时悬浮显示年月.
+    fileprivate lazy var overlayView: UILabel = self.createOverlayView()
+    
+    /// week day header at the top.
+    fileprivate lazy var weekdayHeaderView: YFCalendarWeekdayHeaderView = self.createWeekdayHeaderView()
+    
+    /// first month of the calendar
+    fileprivate lazy var firstMonth: Date = self.createFirstMonth()
+    
+    /// last month of the calendar
+    fileprivate lazy var lastMonth: Date = self.createLastMonth()
+}
+
+// MARK: - view life cycle
+extension YFCalendarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -137,13 +106,10 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
         print(self.firstDate)
         print(self.lastDate)
         
-        
     }
-    
-    
-    
 }
 
+// MARK: - UICollectionViewDataSource Extension
 extension YFCalendarController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -172,6 +138,7 @@ extension YFCalendarController: UICollectionViewDataSource {
     }
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout Extension
 extension YFCalendarController: UICollectionViewDelegateFlowLayout {
     
 //    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -182,6 +149,7 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
 }
 
 
+// MARK: - UI methods
 fileprivate extension YFCalendarController {
     
     func setupHeaderAndOverlayView() {
@@ -206,11 +174,82 @@ fileprivate extension YFCalendarController {
     
 }
 
-// MARK: - Calendar Calculations
+// MARK: - Calendar Calculations 日历计算
 fileprivate extension YFCalendarController {
     
     func clamp(date: Date) -> Date {
         let components = self.calendar.dateComponents(kYFCalendarUnitYMD, from: date)
+        return self.calendar.date(from: components)!
+    }
+    
+}
+
+// MARK: - lazy initializer methods 懒加载方法
+fileprivate extension YFCalendarController {
+    
+    func createFirstDate() -> Date {
+        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
+        components.day = 1
+        return self.calendar.date(from: components)!
+    }
+    
+    func createLastDate() -> Date {
+        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
+        components.day = -1
+        components.year = 1
+        self.lastDate = self.calendar.date(byAdding: components, to: self.firstDate)!
+        return self.lastDate
+    }
+    
+    func createOverlayView() -> UILabel {
+        let overlayView = UILabel()
+        overlayView.backgroundColor = self.backgroundColor.withAlphaComponent(0.90)
+        overlayView.font = UIFont.boldSystemFont(ofSize: YFCalendarOverlaySize)
+        overlayView.textColor = self.overlayTextColor
+        overlayView.alpha = 0.0
+        overlayView.textAlignment = .center
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+        return overlayView
+    }
+    
+    func createWeekdayHeaderView() -> YFCalendarWeekdayHeaderView {
+        let weekdayHeaderView = YFCalendarWeekdayHeaderView.init(calendar: self.calendar, weekdayTextType: YFCalendarWeekdayTextType.VeryShort)
+        weekdayHeaderView.frame = CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 20)
+        return weekdayHeaderView
+    }
+    
+    func createCalendarView() -> UICollectionView {
+        let layout = YFCalendarViewFlowLayout()
+        let view = UICollectionView(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height-64), collectionViewLayout: YFCalendarViewFlowLayout())
+        view.clipsToBounds = false
+        view.backgroundColor = UIColor.white
+        view.showsHorizontalScrollIndicator = false
+        
+        // register cell and section header
+        view.register(YFCalendarCell.self, forCellWithReuseIdentifier: kYFCalendarCellIdentifier)
+        view.register(YFCalendarSectionHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: kYFCalendarSectionHeaderIdentifier)
+        
+        // delegate and datasource
+        view.delegate = self
+        view.dataSource = self
+        
+        // layout
+        let itemWidth = CGFloat(floorf(Float(UIScreen.main.bounds.size.width/7.0)))
+        layout.itemSize = CGSize.init(width: itemWidth, height: itemWidth)
+        
+        return view
+    }
+    
+    func createFirstMonth() -> Date {
+        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: self.firstDate)
+        components.day = 1
+        return self.calendar.date(from: components)!
+    }
+    
+    func createLastMonth() -> Date {
+        var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: self.lastDate)
+        components.day = 0
+        components.month! += 1
         return self.calendar.date(from: components)!
     }
     

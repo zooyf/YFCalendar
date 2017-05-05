@@ -73,8 +73,9 @@
 
 - (IBAction)pushToYFCalendar:(id)sender {
     
-    self.calendarController.testTitle = @"你好";
-    [self.navigationController pushViewController:self.calendarController animated:YES];
+    YFCalendarController *calendarController = [YFCalendarController new];
+    [self.navigationController pushViewController:calendarController animated:YES];
+//    [self.navigationController pushViewController:self.calendarController animated:YES];
 }
 
 - (IBAction)toTestAction:(id)sender {
