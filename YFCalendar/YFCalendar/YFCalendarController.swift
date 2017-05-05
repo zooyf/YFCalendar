@@ -192,6 +192,35 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
 //        
 //        return CGSize.init(width: itemWidth, height: itemWidth)
 //    }
+    
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        if fabs(velocity.y) > 0.0 {
+            if self.overlayView.alpha < 1.0 {
+                UIView.animate(withDuration: 0.25, animations: { 
+                    self.overlayView.alpha = 1.0
+                })
+            }
+        }
+    }
+    
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        let delay = decelerate ? 1.5 : 0.0
+        self.perform(#selector(hideOverlayView), with: nil, afterDelay: delay)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let indexPaths = self.calendarView.indexPathsForVisibleItems
+        let sortedIndexPaths = indexPaths.sorted()
+        if let firstIndexPath = sortedIndexPaths.first {
+            self.overlayView.text = self.headerDateFormatter.string(from: self.firstDateOfMonth(with: firstIndexPath.section))
+        }
+    }
+    
+    func hideOverlayView() {
+        UIView.animate(withDuration: 0.25) { 
+            self.overlayView.alpha = 0.0
+        }
+    }
 }
 
 
