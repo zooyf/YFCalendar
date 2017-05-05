@@ -1,5 +1,5 @@
 //
-//  YFCalendarSectionHeader.swift
+//  YFCalendarSectionHeaderView.swift
 //  YFCalendar
 //
 //  Created by 于帆 on 2017/5/2.
@@ -10,7 +10,7 @@ import UIKit
 
 let YFCalendarWeekdayHeaderSize = CGFloat(12.0)
 
-class YFCalendarSectionHeader: UICollectionReusableView {
+class YFCalendarSectionHeaderView: UICollectionReusableView {
     
     lazy var titleLabel: UILabel = { [unowned self] in
         let lb = UILabel()
@@ -29,9 +29,7 @@ class YFCalendarSectionHeader: UICollectionReusableView {
         
         self.addConstraint(NSLayoutConstraint.init(item: self.titleLabel, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1.0, constant: 0.0))
         self.addConstraint(NSLayoutConstraint.init(item: self.titleLabel, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1.0, constant: 10))
-        
-        self.titleLabel.text = "2017年5月"
-        
+                
         let separatorView = UIView()
         separatorView.backgroundColor = UIColor.lightGray
         self.addSubview(separatorView)

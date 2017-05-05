@@ -24,7 +24,7 @@
 		5E7F02481EA8BDCC0091AD57 /* YFCalendarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E7F02471EA8BDCC0091AD57 /* YFCalendarController.swift */; };
 		5EAA86E61EB829F30026908B /* YFCalendarCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAA86E51EB829F30026908B /* YFCalendarCell.swift */; };
 		5EAA86E81EB8599B0026908B /* YFTestController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAA86E71EB8599B0026908B /* YFTestController.swift */; };
-		5EAA86EA1EB878B70026908B /* YFCalendarSectionHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAA86E91EB878B70026908B /* YFCalendarSectionHeader.swift */; };
+		5EAA86EA1EB878B70026908B /* YFCalendarSectionHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EAA86E91EB878B70026908B /* YFCalendarSectionHeaderView.swift */; };
 		5EB9CB721EBAD9DD0080CE56 /* YFCalendarViewFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB9CB711EBAD9DD0080CE56 /* YFCalendarViewFlowLayout.swift */; };
 /* End PBXBuildFile section */
 
@@ -59,7 +59,7 @@
 		5E7F02471EA8BDCC0091AD57 /* YFCalendarController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YFCalendarController.swift; sourceTree = "<group>"; };
 		5EAA86E51EB829F30026908B /* YFCalendarCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YFCalendarCell.swift; sourceTree = "<group>"; };
 		5EAA86E71EB8599B0026908B /* YFTestController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YFTestController.swift; sourceTree = "<group>"; };
-		5EAA86E91EB878B70026908B /* YFCalendarSectionHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YFCalendarSectionHeader.swift; sourceTree = "<group>"; };
+		5EAA86E91EB878B70026908B /* YFCalendarSectionHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YFCalendarSectionHeaderView.swift; sourceTree = "<group>"; };
 		5EB9CB711EBAD9DD0080CE56 /* YFCalendarViewFlowLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = YFCalendarViewFlowLayout.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -153,7 +153,7 @@
 			children = (
 				5E7F02471EA8BDCC0091AD57 /* YFCalendarController.swift */,
 				5EB9CB711EBAD9DD0080CE56 /* YFCalendarViewFlowLayout.swift */,
-				5EAA86E91EB878B70026908B /* YFCalendarSectionHeader.swift */,
+				5EAA86E91EB878B70026908B /* YFCalendarSectionHeaderView.swift */,
 				5E3EB1221EB9D831009F8483 /* YFCalendarWeekdayHeaderView.swift */,
 				5EAA86E51EB829F30026908B /* YFCalendarCell.swift */,
 			);
@@ -234,7 +234,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5E7F02301EA868720091AD57 /* PDTSimpleCalendarViewController.m in Sources */,
-				5EAA86EA1EB878B70026908B /* YFCalendarSectionHeader.swift in Sources */,
+				5EAA86EA1EB878B70026908B /* YFCalendarSectionHeaderView.swift in Sources */,
 				5E7F02331EA868720091AD57 /* PDTSimpleCalendarViewWeekdayHeader.m in Sources */,
 				5EB9CB721EBAD9DD0080CE56 /* YFCalendarViewFlowLayout.swift in Sources */,
 				5E7F02311EA868720091AD57 /* PDTSimpleCalendarViewFlowLayout.m in Sources */,

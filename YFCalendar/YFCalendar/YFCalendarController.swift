@@ -12,7 +12,7 @@ let YFCalendarOverlaySize           = CGFloat(14.0)
 let YFCalendarWeekdayHeaderHeight   = CGFloat(20.0)
 
 private let kYFCalendarCellIdentifier               = "kYFCalendarCellIdentifier"
-private let kYFCalendarSectionHeaderIdentifier      = "kYFCalendarSectionHeaderIdentifier"
+private let kYFCalendarSectionHeaderViewIdentifier      = "kYFCalendarSectionHeaderViewIdentifier"
 private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
 
 @objc class YFCalendarController : UIViewController
@@ -87,6 +87,9 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
     
     /// last month of the calendar
     fileprivate lazy var lastMonth: Date = self.createLastMonth()
+    
+    /// header date formatter
+    fileprivate lazy var headerDateFormatter: DateFormatter = self.createHeaderDateFormatter()
 }
 
 // MARK: - view life cycle
@@ -119,7 +122,10 @@ extension YFCalendarController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let firstDateOfMonth = self.firstDateOfMonth(with: section)
         let rangeOfWeeks = self.calendar.range(of: Calendar.Component.weekOfMonth, in: Calendar.Component.month, for: firstDateOfMonth)
-        return (rangeOfWeeks!.upperBound - rangeOfWeeks!.lowerBound) * Int(self.daysPerWeek)
+        let distance = rangeOfWeeks?.lowerBound.distance(to: (rangeOfWeeks?.upperBound)!)
+//        distance = (rangeOfWeeks!.upperBound - rangeOfWeeks!.lowerBound)
+        print(rangeOfWeeks?.count == distance)
+        return (rangeOfWeeks?.count)! * Int(self.daysPerWeek)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -131,7 +137,9 @@ extension YFCalendarController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
         if kind == UICollectionElementKindSectionHeader {
-            let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: kYFCalendarSectionHeaderIdentifier, for: indexPath)
+            let headerView: YFCalendarSectionHeaderView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: kYFCalendarSectionHeaderViewIdentifier, for: indexPath) as! YFCalendarSectionHeaderView
+            
+            headerView.titleLabel.text = self.headerDateFormatter.string(from: self.firstDateOfMonth(with: indexPath.section)).uppercased()
             
             return headerView
         } else {
@@ -235,7 +243,7 @@ fileprivate extension YFCalendarController {
         
         // register cell and section header
         view.register(YFCalendarCell.self, forCellWithReuseIdentifier: kYFCalendarCellIdentifier)
-        view.register(YFCalendarSectionHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: kYFCalendarSectionHeaderIdentifier)
+        view.register(YFCalendarSectionHeaderView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: kYFCalendarSectionHeaderViewIdentifier)
         
         // delegate and datasource
         view.delegate = self
@@ -259,6 +267,13 @@ fileprivate extension YFCalendarController {
         components.day = 0
         components.month! += 1
         return self.calendar.date(from: components)!
+    }
+    
+    func createHeaderDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        formatter.calendar = self.calendar
+        formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "yyyy LLLL", options: 0, locale: self.calendar.locale)
+        return formatter
     }
     
 }
