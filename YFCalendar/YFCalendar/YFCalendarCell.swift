@@ -8,11 +8,40 @@
 
 import UIKit
 
+enum YFCalendarCellDateTime {
+    case isToday
+    case beforeToday
+    case afterToday
+}
+
 class YFCalendarCell: UICollectionViewCell
 {
     
-//    var dayLabel = UILabel()
-    
+    private var _dateTime: YFCalendarCellDateTime = .afterToday
+    var dateTime: YFCalendarCellDateTime {
+        get {
+            return _dateTime
+        }
+        set {
+            _dateTime = newValue
+            switch newValue {
+            case .beforeToday:
+                self.dayLabel.textColor = UIColor.gray
+                self.dayLabel.backgroundColor = UIColor.white
+                
+            case .isToday:
+                self.dayLabel.textColor = UIColor.white
+                self.dayLabel.backgroundColor = UIColor.darkGray
+                
+            case .afterToday:
+                self.dayLabel.textColor = UIColor.black
+                self.dayLabel.backgroundColor = UIColor.white
+                
+            }
+            
+        }
+    }
+        
     lazy var dayLabel: UILabel = { [unowned self] in
         let label = UILabel()
 //        label.backgroundColor = UIColor.gray
@@ -25,6 +54,32 @@ class YFCalendarCell: UICollectionViewCell
         return label
     }()
     
+    
+    func setDate(date:Date?, calendar:Calendar?) {
+        self.date = date
+        
+        if date == nil {
+            self.dayLabel.text = ""
+            self.dayLabel.accessibilityLabel = ""
+            return
+        }
+        
+        var day: String = ""
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "d"
+        dateFormatter.calendar = calendar
+        day = dateFormatter.string(from: date!)
+        self.dayLabel.text = day
+        
+        var accessibilityDay = ""
+        let accessibilityFormatter = DateFormatter()
+        accessibilityFormatter.dateStyle = .long
+        accessibilityFormatter.timeStyle = .none
+        accessibilityDay = accessibilityFormatter.string(from: date!)
+        self.dayLabel.accessibilityLabel = accessibilityDay
+    }
+    
+    fileprivate var date: Date!
     
     override init(frame: CGRect) {
         super.init(frame: frame)

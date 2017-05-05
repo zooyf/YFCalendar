@@ -129,8 +129,44 @@ extension YFCalendarController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kYFCalendarCellIdentifier,for: indexPath)
+        let cell: YFCalendarCell = collectionView.dequeueReusableCell(withReuseIdentifier: kYFCalendarCellIdentifier,for: indexPath) as! YFCalendarCell
+        
+        let firstDateOfMonth: Date = self.firstDateOfMonth(with: indexPath.section)
+        let weekDay: Int = self.calendar.dateComponents([.weekday], from: firstDateOfMonth).weekday!
+        var startOffset = weekDay - self.calendar.firstWeekday
+        startOffset += Int(startOffset >= 0 ? 0 : self.daysPerWeek)
+        
+        var dateComponents = DateComponents()
+        dateComponents.day = indexPath.item - startOffset
+        
+        let cellDate: Date = self.calendar.date(byAdding: dateComponents, to: firstDateOfMonth)!
+        
+        let cellDateComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: cellDate)
+        let firstDateMonthComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: firstDateOfMonth)
+        
+        if cellDateComponents.month == firstDateMonthComponents.month {
+            cell.setDate(date: cellDate, calendar: self.calendar)
+            
+            var dateTime: YFCalendarCellDateTime = .afterToday
+            switch cellDate.compare(self.calendar.startOfDay(for: Date())) {
+            case .orderedAscending:
+                dateTime = .beforeToday
                 
+            case .orderedSame:
+                dateTime = .isToday
+                
+            case .orderedDescending:
+                dateTime = .afterToday
+            }
+            
+            cell.dateTime = dateTime
+            
+        } else {
+            cell.setDate(date: nil, calendar: nil)
+        }
+        
+        
+        
         return cell
     }
     
@@ -205,7 +241,7 @@ fileprivate extension YFCalendarController {
     
     func createFirstDate() -> Date {
         var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
-        components.day = 1
+//        components.day = 1
         return self.calendar.date(from: components)!
     }
     
@@ -240,6 +276,7 @@ fileprivate extension YFCalendarController {
         view.clipsToBounds = false
         view.backgroundColor = UIColor.white
         view.showsHorizontalScrollIndicator = false
+        view.allowsMultipleSelection = true
         
         // register cell and section header
         view.register(YFCalendarCell.self, forCellWithReuseIdentifier: kYFCalendarCellIdentifier)
