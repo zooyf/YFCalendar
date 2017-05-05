@@ -113,11 +113,13 @@ extension YFCalendarController {
 extension YFCalendarController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 10;
+        return self.calendar.dateComponents(kYFCalendarUnitYMD, from: self.firstMonth, to: self.lastMonth).month! + 1;
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 5*7
+        let firstDateOfMonth = self.firstDateOfMonth(with: section)
+        let rangeOfWeeks = self.calendar.range(of: Calendar.Component.weekOfMonth, in: Calendar.Component.month, for: firstDateOfMonth)
+        return (rangeOfWeeks!.upperBound - rangeOfWeeks!.lowerBound) * Int(self.daysPerWeek)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -182,6 +184,12 @@ fileprivate extension YFCalendarController {
         return self.calendar.date(from: components)!
     }
     
+    func firstDateOfMonth(with section: Int) -> Date {
+        var offsetComponents = DateComponents()
+        offsetComponents.month = section
+        return self.calendar.date(byAdding: offsetComponents, to: self.firstMonth)!
+    }
+    
 }
 
 // MARK: - lazy initializer methods 懒加载方法
@@ -220,7 +228,7 @@ fileprivate extension YFCalendarController {
     
     func createCalendarView() -> UICollectionView {
         let layout = YFCalendarViewFlowLayout()
-        let view = UICollectionView(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height-64), collectionViewLayout: YFCalendarViewFlowLayout())
+        let view = UICollectionView(frame: CGRect.init(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height-64), collectionViewLayout: layout)
         view.clipsToBounds = false
         view.backgroundColor = UIColor.white
         view.showsHorizontalScrollIndicator = false
