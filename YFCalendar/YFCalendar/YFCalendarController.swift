@@ -48,6 +48,11 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
         }
     }
     
+    fileprivate var startDate: Date?
+    
+    fileprivate var endDate: Date?
+    
+    
     /**
      *  The calendar used to generate the view.
      *
@@ -144,10 +149,15 @@ extension YFCalendarController: UICollectionViewDataSource {
         let cellDateComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: cellDate)
         let firstDateMonthComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: firstDateOfMonth)
         
+        var dateTime: YFCalendarCellDateTimeType = .beforeToday
+        var selectionStyle: YFCalendarCellSelectionStyle = .none
+        if indexPath.section == 1 && indexPath.row == 3 {
+            print(indexPath)
+        }
+        
         if cellDateComponents.month == firstDateMonthComponents.month {
             cell.setDate(date: cellDate, calendar: self.calendar)
             
-            var dateTime: YFCalendarCellDateTime = .afterToday
             switch cellDate.compare(self.calendar.startOfDay(for: Date())) {
             case .orderedAscending:
                 dateTime = .beforeToday
@@ -159,13 +169,35 @@ extension YFCalendarController: UICollectionViewDataSource {
                 dateTime = .afterToday
             }
             
-            cell.dateTime = dateTime
+            
+            if let startDate = self.startDate {
+                let startDateCompare = startDate.compare(cellDate)
+                let isStartDate = startDateCompare == .orderedSame
+                if let endDate = self.endDate {
+                    let compareEndDate = cellDate.compare(endDate)
+                    let isEndDate = compareEndDate == .orderedSame
+                    if isStartDate {
+                        selectionStyle = .leftBorder
+                    }
+                    else if isEndDate {
+                        selectionStyle = .rightBorder
+                    }
+                    else if startDateCompare == .orderedAscending && compareEndDate == .orderedAscending {
+                        selectionStyle = .middle
+                    }
+                    
+                } else {
+                    if isStartDate {
+                        selectionStyle = .single
+                    }
+                }
+            }
             
         } else {
             cell.setDate(date: nil, calendar: nil)
         }
-        
-        
+        cell.dateTimeType = dateTime
+        cell.selectionStyle = selectionStyle
         
         return cell
     }
@@ -187,11 +219,43 @@ extension YFCalendarController: UICollectionViewDataSource {
 // MARK: - UICollectionViewDelegateFlowLayout Extension
 extension YFCalendarController: UICollectionViewDelegateFlowLayout {
     
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        let itemWidth = CGFloat(floorf(Float(UIScreen.main.bounds.size.width/7.0)))
-//        
-//        return CGSize.init(width: itemWidth, height: itemWidth)
-//    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        let cell: YFCalendarCell = collectionView.cellForItem(at: indexPath) as! YFCalendarCell
+        
+        if cell.date == nil {
+            return
+        }
+        
+        if let startDate = self.startDate {
+            if let _ = self.endDate {
+                self.endDate = nil
+                self.startDate = cell.date
+            } else {
+                switch startDate.compare(cell.date!) {
+                case .orderedAscending:
+                    self.endDate = cell.date
+                    
+                case .orderedDescending:
+                    self.endDate = startDate
+                    self.startDate = cell.date
+                    
+                default:
+                    break
+                }
+            }
+            
+        } else {
+            self.startDate = cell.date
+        }
+        
+        collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
+        collectionView.reloadData()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        
+    }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         if fabs(velocity.y) > 0.0 {
@@ -263,6 +327,21 @@ fileprivate extension YFCalendarController {
         return self.calendar.date(byAdding: offsetComponents, to: self.firstMonth)!
     }
     
+    func indexPath(ofDate date:Date?) -> IndexPath? {
+        if date == nil {
+            return nil
+        }
+        
+        for cell in self.calendarView.visibleCells as! [YFCalendarCell] {
+            if let cellDate = cell.date {
+                if cellDate.compare(date!) == .orderedSame {
+                    return self.calendarView.indexPath(for: cell)
+                }
+            }
+        }
+        
+        return nil
+    }
 }
 
 // MARK: - lazy initializer methods 懒加载方法
@@ -270,14 +349,14 @@ fileprivate extension YFCalendarController {
     
     func createFirstDate() -> Date {
         var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
-//        components.day = 1
+        components.day = 1
         return self.calendar.date(from: components)!
     }
     
     func createLastDate() -> Date {
         var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
-        components.day = -1
         components.year = 1
+        components.month = -1
         self.lastDate = self.calendar.date(byAdding: components, to: self.firstDate)!
         return self.lastDate
     }
@@ -317,7 +396,10 @@ fileprivate extension YFCalendarController {
         
         // layout
         let itemWidth = CGFloat(floorf(Float(UIScreen.main.bounds.size.width/7.0)))
+        layout.sectionInset = UIEdgeInsetsMake(0, UIScreen.main.bounds.size.width - itemWidth * 7.0, 0, 0)
         layout.itemSize = CGSize.init(width: itemWidth, height: itemWidth)
+        layout.minimumLineSpacing = CGFloat.leastNormalMagnitude
+        layout.minimumInteritemSpacing = CGFloat.leastNormalMagnitude
         
         return view
     }
