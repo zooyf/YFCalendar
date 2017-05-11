@@ -249,7 +249,6 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
             self.startDate = cell.date
         }
         
-        collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
         collectionView.reloadData()
     }
     
