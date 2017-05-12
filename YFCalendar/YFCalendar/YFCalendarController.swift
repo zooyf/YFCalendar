@@ -15,10 +15,21 @@ private let kYFCalendarCellIdentifier               = "kYFCalendarCellIdentifier
 private let kYFCalendarSectionHeaderViewIdentifier      = "kYFCalendarSectionHeaderViewIdentifier"
 private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
 
+@objc(YFCalendarControllerDelegate)
+protocol YFCalendarControllerDelegate: NSObjectProtocol {
+    
+    @objc optional func yf_calendar(_ controller: YFCalendarController, willFinishPickingDate startDate: Date, endDate: Date) -> Bool
+    
+    @objc optional func yf_calendar(_ controller: YFCalendarController, didFinishPickingDate startDate: Date, endDate: Date)
+    
+}
+
 @objc class YFCalendarController : UIViewController
 {
     
     // MARK: - default properties
+    
+    weak var delegate: YFCalendarControllerDelegate?
     
     /// Background color of the Calendar. This will also affect the value of the background color for the overlay view.
     lazy var backgroundColor: UIColor = UIColor.white
@@ -223,15 +234,18 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
         
         let cell: YFCalendarCell = collectionView.cellForItem(at: indexPath) as! YFCalendarCell
         
-        if cell.date == nil {
+        if cell.dateTimeType == .beforeToday {
             return
         }
         
         if let startDate = self.startDate {
+            
             if let _ = self.endDate {
+                /// 如果开始和结束日期都已选择,重新选择
                 self.endDate = nil
                 self.startDate = cell.date
             } else {
+                /// 否则,设置endDate
                 switch startDate.compare(cell.date!) {
                 case .orderedAscending:
                     self.endDate = cell.date
@@ -243,9 +257,13 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
                 default:
                     break
                 }
+                
+                self.delegate?.yf_calendar?(self, didFinishPickingDate: startDate, endDate: self.endDate!)
             }
             
+            
         } else {
+            
             self.startDate = cell.date
         }
         

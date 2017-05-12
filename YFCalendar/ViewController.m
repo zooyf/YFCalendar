@@ -11,13 +11,15 @@
 #import "YFCalendar-Swift.h"
 #import "TestViewController.h"
 
-@interface ViewController () <PDTSimpleCalendarViewDelegate>
+@interface ViewController () <PDTSimpleCalendarViewDelegate, YFCalendarControllerDelegate>
 
 @property (nonatomic, strong) PDTSimpleCalendarViewController *pdtCalendarViewController;
 
 @property (nonatomic, strong) YFCalendarController *calendarController;
 
 @property (nonatomic, strong) YFTestController *testVC;
+@property (weak, nonatomic) IBOutlet UILabel *dateLb1;
+@property (weak, nonatomic) IBOutlet UILabel *dateLb2;
 
 @end
 
@@ -74,6 +76,7 @@
 - (IBAction)pushToYFCalendar:(id)sender {
     
     YFCalendarController *calendarController = [YFCalendarController new];
+    calendarController.delegate = self;
     [self.navigationController pushViewController:calendarController animated:YES];
 //    [self.navigationController pushViewController:self.calendarController animated:YES];
 }
@@ -81,6 +84,18 @@
 - (IBAction)toTestAction:(id)sender {
     
     [self.navigationController pushViewController:self.testVC animated:YES];
+}
+
+- (void)yf_calendar:(YFCalendarController *)controller didFinishPickingDate:(NSDate *)startDate endDate:(NSDate *)endDate {
+    NSDateFormatter *formatter = [NSDateFormatter new];
+    [formatter setDateFormat:@"yyyy mm dd"];
+    
+    self.dateLb1.text = [NSDateFormatter localizedStringFromDate:startDate dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterNoStyle];
+    [self.dateLb1 sizeToFit];
+    self.dateLb2.text = [NSDateFormatter localizedStringFromDate:endDate dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterNoStyle];
+    [self.dateLb2 sizeToFit];
+    
+    [controller.navigationController popViewControllerAnimated:YES];
 }
 
 @end
