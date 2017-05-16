@@ -31,5 +31,5 @@ YFCalnedar is a convenience calendar date picker library written in swift for iO
 
 Screenshots
 ==========
-| ![](http://i4.buimg.com/588926/57de767fc63efdcb.png) | ![](http://i4.buimg.com/588926/7c3751385cf96596.png) |
+| ![](http://i4.buimg.com/588926/7c3751385cf96596.png) | ![](http://i4.buimg.com/588926/57de767fc63efdcb.png) |
 | ------------- | ---------- |
