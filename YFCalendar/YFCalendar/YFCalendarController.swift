@@ -11,7 +11,7 @@ import UIKit
 let YFCalendarOverlaySize           = CGFloat(14.0)
 let YFCalendarWeekdayHeaderHeight   = CGFloat(20.0)
 
-private let kYFCalendarCellIdentifier               = "kYFCalendarCellIdentifier"
+private let kYFCalendarCellIdentifier                   = "kYFCalendarCellIdentifier"
 private let kYFCalendarSectionHeaderViewIdentifier      = "kYFCalendarSectionHeaderViewIdentifier"
 private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
 
@@ -59,9 +59,27 @@ protocol YFCalendarControllerDelegate: NSObjectProtocol {
         }
     }
     
-    fileprivate var startDate: Date?
+    private var _startDate: Date?
+    /// First selection date. 选中的第一个日期
+    var startDate: Date? {
+        get {
+            return _startDate
+        }
+        set {
+            _startDate = (newValue != nil) ? self.clamp(date: newValue!) : nil
+        }
+    }
     
-    fileprivate var endDate: Date?
+    private var _endDate: Date?
+    /// Last selection date. 选中的最后一个日期
+    var endDate: Date? {
+        get {
+            return _endDate
+        }
+        set {
+            _endDate = (newValue != nil) ? self.clamp(date: newValue!) : nil
+        }
+    }
     
     
     /**

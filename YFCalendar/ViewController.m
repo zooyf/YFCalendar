@@ -21,6 +21,9 @@
 @property (weak, nonatomic) IBOutlet UILabel *dateLb1;
 @property (weak, nonatomic) IBOutlet UILabel *dateLb2;
 
+@property (nonatomic, strong) NSDate *date1;
+@property (nonatomic, strong) NSDate *date2;
+
 @end
 
 @implementation ViewController
@@ -77,6 +80,9 @@
     
     YFCalendarController *calendarController = [YFCalendarController new];
     calendarController.delegate = self;
+    calendarController.startDate = self.date1;
+    calendarController.endDate = self.date2;
+    
     [self.navigationController pushViewController:calendarController animated:YES];
 //    [self.navigationController pushViewController:self.calendarController animated:YES];
 }
@@ -94,6 +100,9 @@
     [self.dateLb1 sizeToFit];
     self.dateLb2.text = [NSDateFormatter localizedStringFromDate:endDate dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterNoStyle];
     [self.dateLb2 sizeToFit];
+    
+    self.date1 = startDate;
+    self.date2 = endDate;
     
     [controller.navigationController popViewControllerAnimated:YES];
 }

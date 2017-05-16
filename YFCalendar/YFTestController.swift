@@ -10,7 +10,7 @@ import UIKit
 
 class YFTestController: UIViewController {
     
-    var dayLabel = UILabel()
+    var button = UIButton()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,17 +18,34 @@ class YFTestController: UIViewController {
         self.view.backgroundColor = UIColor.white
         
         
-        self.dayLabel.backgroundColor = UIColor.red
-        self.view.addSubview(self.dayLabel)
-        self.dayLabel.translatesAutoresizingMaskIntoConstraints = false
-        self.dayLabel.layer.cornerRadius = 16
+        self.button.backgroundColor = UIColor.red
+        self.view.addSubview(self.button)
+        self.button.translatesAutoresizingMaskIntoConstraints = false
+        self.button.layer.cornerRadius = 16
         
-        self.view.addConstraint(NSLayoutConstraint.init(item: self.dayLabel, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1.0, constant: 0.0))
-        self.view.addConstraint(NSLayoutConstraint.init(item: self.dayLabel, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0.0))
-        self.view.addConstraint(NSLayoutConstraint.init(item: self.dayLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 32))
-        self.view.addConstraint(NSLayoutConstraint.init(item: self.dayLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 32))
+        self.view.addConstraint(NSLayoutConstraint.init(item: self.button, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1.0, constant: 0.0))
+        self.view.addConstraint(NSLayoutConstraint.init(item: self.button, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0.0))
+        self.view.addConstraint(NSLayoutConstraint.init(item: self.button, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 32))
+        self.view.addConstraint(NSLayoutConstraint.init(item: self.button, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 32))
+        
+        self.button.addTarget(self, action: #selector(toYFCalendarController), for: .touchUpInside)
         
         
+    }
+    
+    func toYFCalendarController() {
+        
+        let oneDayTimeInterval: TimeInterval = 24*60*60
+        
+        let calendarController: YFCalendarController = YFCalendarController()
+        
+//        calendarController.firstDate = Date();
+//        calendarController.lastDate = Date().addingTimeInterval(11/12.0*365*oneDayTimeInterval)
+        
+        calendarController.startDate = Date().addingTimeInterval(oneDayTimeInterval)
+        calendarController.endDate = Date().addingTimeInterval(oneDayTimeInterval * 5)
+        
+        self.navigationController?.pushViewController(calendarController, animated: true)
     }
     
 }
