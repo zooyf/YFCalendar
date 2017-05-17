@@ -1,6 +1,8 @@
 YFCalendar
 ===
-YFCalnedar is a convenience calendar date picker library written in swift for iOS 8.0+. 
+* Inspired by [PDTSimpleCalendar](https://github.com/jivesoftware/PDTSimpleCalendar). I write this similar date picker library. 
+
+* It's a convenience calendar date picker library written in swift for iOS 8.0+. 
 
 ## Install
 * Drag `YFCalendar` folder into your project. 👍

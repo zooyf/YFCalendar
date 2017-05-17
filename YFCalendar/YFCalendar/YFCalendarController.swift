@@ -150,7 +150,7 @@ extension YFCalendarController {
 extension YFCalendarController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return self.calendar.dateComponents(kYFCalendarUnitYMD, from: self.firstMonth, to: self.lastMonth).month! + 1;
+        return self.calendar.dateComponents([.month], from: self.firstMonth, to: self.lastMonth).month! + 1;
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -390,7 +390,7 @@ fileprivate extension YFCalendarController {
     
     func createLastDate() -> Date {
         var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
-        components.year = 1
+        components.year = 2
         components.month = -1
         self.lastDate = self.calendar.date(byAdding: components, to: self.firstDate)!
         return self.lastDate

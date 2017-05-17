@@ -39,8 +39,8 @@ class YFTestController: UIViewController {
         
         let calendarController: YFCalendarController = YFCalendarController()
         
-//        calendarController.firstDate = Date();
-//        calendarController.lastDate = Date().addingTimeInterval(11/12.0*365*oneDayTimeInterval)
+        calendarController.firstDate = Date();
+        calendarController.lastDate = Date().addingTimeInterval(3.5*365*oneDayTimeInterval)
         
         calendarController.startDate = Date().addingTimeInterval(oneDayTimeInterval)
         calendarController.endDate = Date().addingTimeInterval(oneDayTimeInterval * 5)

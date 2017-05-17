@@ -49,7 +49,7 @@
         _pdtCalendarViewController.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeVeryShort;
         _pdtCalendarViewController.delegate = self;
         NSDateComponents *dateComponents = [NSDateComponents new];
-        [dateComponents setDay:1];
+        [dateComponents setDay:10];
         [dateComponents setMonth:2];
         [dateComponents setYear:2015];
         NSDate *date = [[NSCalendar currentCalendar] dateFromComponents:dateComponents];
@@ -71,7 +71,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (IBAction)pushToPDTCalendarAction:(id)sender {    
+- (IBAction)pushToPDTCalendarAction:(id)sender {
     [self.navigationController pushViewController:self.pdtCalendarViewController animated:YES];
     
 }
