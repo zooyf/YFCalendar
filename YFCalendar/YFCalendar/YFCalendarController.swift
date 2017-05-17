@@ -241,35 +241,32 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        let cellDate = self.dateForIndexPath(indexPath)
+        
         var shouldPop = false
-        
-        let cell: YFCalendarCell = collectionView.cellForItem(at: indexPath) as! YFCalendarCell
-        
-        if cell.dateTimeType == .disabledDate {
-            return
-        }
-        
         if let startDate = self.startDate {
             
             if let _ = self.endDate {
                 /// if the start and end date all be selected, reset. 如果开始和结束日期都已选择,重新选择
                 self.endDate = nil
-                self.startDate = cell.date
+                self.startDate = cellDate
             } else {
                 /// otherwise, set endDate. 否则,设置endDate
-                switch startDate.compare(cell.date!) {
+                switch startDate.compare(cellDate) {
                 case .orderedAscending:
-                    self.endDate = cell.date
+                    self.endDate = cellDate
                     
                 case .orderedDescending:
                     self.endDate = startDate
-                    self.startDate = cell.date
+                    self.startDate = cellDate
                     
+                // default and .orderedSame cases must return. cause the following 'if let' require both self.startDate and self.endDate not empty!
                 default:
-                    break
+                    return
                 }
                 
-                if let result = self.delegate?.yf_calendardidFinishPickingDate?(startDate: startDate, endDate: self.endDate!) {
+                if let result = self.delegate?.yf_calendardidFinishPickingDate?(startDate: self.startDate!, endDate: self.endDate!) {
                     shouldPop = result
                 }
             }
@@ -277,7 +274,7 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
             
         } else {
             
-            self.startDate = cell.date
+            self.startDate = cellDate
         }
         
         collectionView.reloadData()
