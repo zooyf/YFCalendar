@@ -51,10 +51,10 @@
         NSDateComponents *dateComponents = [NSDateComponents new];
         [dateComponents setDay:10];
         [dateComponents setMonth:2];
-        [dateComponents setYear:2015];
+        [dateComponents setYear:2017];
         NSDate *date = [[NSCalendar currentCalendar] dateFromComponents:dateComponents];
         _pdtCalendarViewController.firstDate = date;
-        _pdtCalendarViewController.lastDate = [NSDate date];
+        _pdtCalendarViewController.lastDate = [[NSDate date] dateByAddingTimeInterval:60*60*24*10];
     }
     return _pdtCalendarViewController;
 }
@@ -92,7 +92,7 @@
     [self.navigationController pushViewController:self.testVC animated:YES];
 }
 
-- (void)yf_calendar:(YFCalendarController *)controller didFinishPickingDate:(NSDate *)startDate endDate:(NSDate *)endDate {
+- (BOOL)yf_calendardidFinishPickingDateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate {
     NSDateFormatter *formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"yyyy mm dd"];
     
@@ -104,7 +104,7 @@
     self.date1 = startDate;
     self.date2 = endDate;
     
-    [controller.navigationController popViewControllerAnimated:YES];
+    return true;
 }
 
 @end
