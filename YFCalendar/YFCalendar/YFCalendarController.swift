@@ -353,8 +353,9 @@ fileprivate extension YFCalendarController {
     /// - Parameter date: input date
     /// - Returns: New date with h/m/s components set to zero.
     func clamp(date: Date) -> Date {
-        let components = self.calendar.dateComponents(kYFCalendarUnitYMD, from: date)
-        return self.calendar.date(from: components)!
+//        let components = self.calendar.dateComponents(kYFCalendarUnitYMD, from: date)
+//        return self.calendar.date(from: components)!
+        return self.calendar.startOfDay(for:date)
     }
     
     func firstDateOfMonth(with section: Int) -> Date {
@@ -393,7 +394,7 @@ fileprivate extension YFCalendarController {
     func isEnabledDate(someDate: Date) -> Bool {
         let cellDate = self.clamp(date: someDate)
         var enabled = false
-        if cellDate.compare(self.firstDate) == .orderedDescending && cellDate.compare(self.lastDate) == .orderedAscending {
+        if (cellDate.compare(self.firstDate) == .orderedDescending && cellDate.compare(self.lastDate) == .orderedAscending) || cellDate.compare(self.firstDate) == .orderedSame {
             enabled = true
         }
         return enabled

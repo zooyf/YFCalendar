@@ -80,6 +80,7 @@
     
     YFCalendarController *calendarController = [YFCalendarController new];
     calendarController.delegate = self;
+    calendarController.firstDate = [NSDate date];
     calendarController.startDate = self.date1;
     calendarController.endDate = self.date2;
     
