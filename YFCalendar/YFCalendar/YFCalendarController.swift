@@ -295,8 +295,13 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
     }
     
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        let delay = decelerate ? 1.5 : 0.0
-        self.perform(#selector(hideOverlayView), with: nil, afterDelay: delay)
+        let delay = decelerate ? 1.5 : 0
+        UIView.animate(withDuration: 0.25, delay: delay, options: [], animations: { 
+            self.overlayView.alpha = 0.0
+        }, completion: nil)
+//        let dispatchTime = DispatchTime.now() + .milliseconds(delay)
+//        DispatchQueue.main.asyncAfter(deadline: dispatchTime) {
+//        }
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -333,25 +338,20 @@ fileprivate extension YFCalendarController {
         self.calendarView.contentInset = UIEdgeInsetsMake(weekdayHeaderHeight, 0, 0, 0);
     }
     
-    
-    // Without '@objc', error would rise in 'self.perform(#selector(hideOverlayView), with: nil, afterDelay: delay)'
-    @objc func hideOverlayView() {
-        UIView.animate(withDuration: 0.25) {
-            self.overlayView.alpha = 0.0
-        }
-    }
 }
 
 // MARK: - Calendar Calculations 日历计算
 fileprivate extension YFCalendarController {
     
-    /// Get the midnight time of a specific date.
-    ///   e.g.
-    ///    input: 2017-1-1 14:33:32
-    ///   output: 2017-1-1 00:00:00
+    /// Returns the first moment of a given date.
     ///
-    /// - Parameter date: input date
-    /// - Returns: New date with h/m/s components set to zero.
+    /// e.g.
+    ///
+    /// input: 2017-1-1 14:33:32
+    ///
+    /// output: 2017-1-1 00:00:00
+    /// - Parameter date: The date to search.
+    /// - Returns: The first moment of a given date.
     func clamp(date: Date) -> Date {
 //        let components = self.calendar.dateComponents(kYFCalendarUnitYMD, from: date)
 //        return self.calendar.date(from: components)!
