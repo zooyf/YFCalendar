@@ -18,9 +18,7 @@ private let kYFCalendarUnitYMD: Set<Calendar.Component> = [.day, .month, .year]
 @objc(YFCalendarControllerDelegate)
 protocol YFCalendarControllerDelegate: NSObjectProtocol {
     
-    @objc optional func yf_calendar(_ controller: YFCalendarController, willFinishPickingDate startDate: Date, endDate: Date) -> Bool
-    
-    @objc optional func yf_calendar(_ controller: YFCalendarController, didFinishPickingDate startDate: Date, endDate: Date)
+    @objc optional func yf_calendardidFinishPickingDate(startDate: Date, endDate: Date) -> Bool
     
 }
 
@@ -150,7 +148,7 @@ extension YFCalendarController {
 extension YFCalendarController: UICollectionViewDataSource {
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return self.calendar.dateComponents(kYFCalendarUnitYMD, from: self.firstMonth, to: self.lastMonth).month! + 1;
+        return self.calendar.dateComponents([.month], from: self.firstMonth, to: self.lastMonth).month! + 1;
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -165,37 +163,24 @@ extension YFCalendarController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: YFCalendarCell = collectionView.dequeueReusableCell(withReuseIdentifier: kYFCalendarCellIdentifier,for: indexPath) as! YFCalendarCell
         
-        let firstDateOfMonth: Date = self.firstDateOfMonth(with: indexPath.section)
-        let weekDay: Int = self.calendar.dateComponents([.weekday], from: firstDateOfMonth).weekday!
-        var startOffset = weekDay - self.calendar.firstWeekday
-        startOffset += Int(startOffset >= 0 ? 0 : self.daysPerWeek)
+        let cellDate: Date = self.dateForIndexPath(indexPath)
         
-        var dateComponents = DateComponents()
-        dateComponents.day = indexPath.item - startOffset
+        var dateTime: YFCalendarCellDateTimeType = .disabledDate
         
-        let cellDate: Date = self.calendar.date(byAdding: dateComponents, to: firstDateOfMonth)!
-        
-        let cellDateComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: cellDate)
-        let firstDateMonthComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: firstDateOfMonth)
-        
-        var dateTime: YFCalendarCellDateTimeType = .beforeToday
         var selectionStyle: YFCalendarCellSelectionStyle = .none
         if indexPath.section == 1 && indexPath.row == 3 {
             print(indexPath)
         }
         
-        if cellDateComponents.month == firstDateMonthComponents.month {
+        if self.dateInCurrentMonth(indexPath) {
+            
             cell.setDate(date: cellDate, calendar: self.calendar)
             
-            switch cellDate.compare(self.calendar.startOfDay(for: Date())) {
-            case .orderedAscending:
-                dateTime = .beforeToday
-                
-            case .orderedSame:
-                dateTime = .isToday
-                
-            case .orderedDescending:
-                dateTime = .afterToday
+            // specify the cellDate. enabled/disabled or today
+            if self.isEnabledDate(someDate: cellDate) {
+                dateTime = self.isTodayDate(someDate: cellDate) ? .isToday : .enabledDate
+            } else {
+                dateTime = .disabledDate
             }
             
             
@@ -228,6 +213,9 @@ extension YFCalendarController: UICollectionViewDataSource {
         cell.dateTimeType = dateTime
         cell.selectionStyle = selectionStyle
         
+        cell.layer.shouldRasterize = true
+        cell.layer.rasterizationScale = UIScreen.main.scale
+        
         return cell
     }
     
@@ -248,48 +236,52 @@ extension YFCalendarController: UICollectionViewDataSource {
 // MARK: - UICollectionViewDelegateFlowLayout Extension
 extension YFCalendarController: UICollectionViewDelegateFlowLayout {
     
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        return self.isEnabledDate(someDate: self.dateForIndexPath(indexPath))
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        let cell: YFCalendarCell = collectionView.cellForItem(at: indexPath) as! YFCalendarCell
+        let cellDate = self.dateForIndexPath(indexPath)
         
-        if cell.dateTimeType == .beforeToday {
-            return
-        }
-        
+        var shouldPop = false
         if let startDate = self.startDate {
             
             if let _ = self.endDate {
-                /// 如果开始和结束日期都已选择,重新选择
+                /// if the start and end date all be selected, reset. 如果开始和结束日期都已选择,重新选择
                 self.endDate = nil
-                self.startDate = cell.date
+                self.startDate = cellDate
             } else {
-                /// 否则,设置endDate
-                switch startDate.compare(cell.date!) {
+                /// otherwise, set endDate. 否则,设置endDate
+                switch startDate.compare(cellDate) {
                 case .orderedAscending:
-                    self.endDate = cell.date
+                    self.endDate = cellDate
                     
                 case .orderedDescending:
                     self.endDate = startDate
-                    self.startDate = cell.date
+                    self.startDate = cellDate
                     
+                // default and .orderedSame cases must return. cause the following 'if let' require both self.startDate and self.endDate not empty!
                 default:
-                    break
+                    return
                 }
                 
-                self.delegate?.yf_calendar?(self, didFinishPickingDate: startDate, endDate: self.endDate!)
+                if let result = self.delegate?.yf_calendardidFinishPickingDate?(startDate: self.startDate!, endDate: self.endDate!) {
+                    shouldPop = result
+                }
             }
             
             
         } else {
             
-            self.startDate = cell.date
+            self.startDate = cellDate
         }
         
         collectionView.reloadData()
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         
+        if shouldPop {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
     
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
@@ -315,11 +307,6 @@ extension YFCalendarController: UICollectionViewDelegateFlowLayout {
         }
     }
     
-    func hideOverlayView() {
-        UIView.animate(withDuration: 0.25) { 
-            self.overlayView.alpha = 0.0
-        }
-    }
 }
 
 
@@ -346,20 +333,46 @@ fileprivate extension YFCalendarController {
         self.calendarView.contentInset = UIEdgeInsetsMake(weekdayHeaderHeight, 0, 0, 0);
     }
     
+    
+    // Without '@objc', error would rise in 'self.perform(#selector(hideOverlayView), with: nil, afterDelay: delay)'
+    @objc func hideOverlayView() {
+        UIView.animate(withDuration: 0.25) {
+            self.overlayView.alpha = 0.0
+        }
+    }
 }
 
 // MARK: - Calendar Calculations 日历计算
 fileprivate extension YFCalendarController {
     
+    /// Get the midnight time of a specific date.
+    ///   e.g.
+    ///    input: 2017-1-1 14:33:32
+    ///   output: 2017-1-1 00:00:00
+    ///
+    /// - Parameter date: input date
+    /// - Returns: New date with h/m/s components set to zero.
     func clamp(date: Date) -> Date {
-        let components = self.calendar.dateComponents(kYFCalendarUnitYMD, from: date)
-        return self.calendar.date(from: components)!
+//        let components = self.calendar.dateComponents(kYFCalendarUnitYMD, from: date)
+//        return self.calendar.date(from: components)!
+        return self.calendar.startOfDay(for:date)
     }
     
     func firstDateOfMonth(with section: Int) -> Date {
         var offsetComponents = DateComponents()
         offsetComponents.month = section
         return self.calendar.date(byAdding: offsetComponents, to: self.firstMonth)!
+    }
+    
+    func dateForIndexPath(_ indexPath: IndexPath) -> Date {
+        let firstDateOfMonth: Date = self.firstDateOfMonth(with: indexPath.section)
+        let weekDay: Int = self.calendar.dateComponents([.weekday], from: firstDateOfMonth).weekday!
+        var startOffset = weekDay - self.calendar.firstWeekday
+        startOffset += Int(startOffset >= 0 ? 0 : self.daysPerWeek)
+        
+        var dateComponents = DateComponents()
+        dateComponents.day = indexPath.item - startOffset
+        return  self.calendar.date(byAdding: dateComponents, to: firstDateOfMonth)!
     }
     
     func indexPath(ofDate date:Date?) -> IndexPath? {
@@ -377,6 +390,29 @@ fileprivate extension YFCalendarController {
         
         return nil
     }
+    
+    func isEnabledDate(someDate: Date) -> Bool {
+        let cellDate = self.clamp(date: someDate)
+        var enabled = false
+        if (cellDate.compare(self.firstDate) == .orderedDescending && cellDate.compare(self.lastDate) == .orderedAscending) || cellDate.compare(self.firstDate) == .orderedSame {
+            enabled = true
+        }
+        return enabled
+    }
+    
+    func isTodayDate(someDate: Date) -> Bool {
+        let cellDate = self.clamp(date: someDate)
+        return cellDate.compare(self.calendar.startOfDay(for: Date())) == .orderedSame
+    }
+    
+    func dateInCurrentMonth(_ indexPath: IndexPath) -> Bool {
+        
+        let firstDateOfMonth: Date = self.firstDateOfMonth(with: indexPath.section)
+        let cellDateComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: self.dateForIndexPath(indexPath))
+        let firstDateMonthComponents: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: firstDateOfMonth)
+        
+        return cellDateComponents.month == firstDateMonthComponents.month
+    }
 }
 
 // MARK: - lazy initializer methods 懒加载方法
@@ -390,7 +426,7 @@ fileprivate extension YFCalendarController {
     
     func createLastDate() -> Date {
         var components: DateComponents = self.calendar.dateComponents(kYFCalendarUnitYMD, from: Date.init())
-        components.year = 1
+        components.year = 2
         components.month = -1
         self.lastDate = self.calendar.date(byAdding: components, to: self.firstDate)!
         return self.lastDate

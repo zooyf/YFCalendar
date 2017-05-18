@@ -10,8 +10,8 @@ import UIKit
 
 enum YFCalendarCellDateTimeType {
     case isToday
-    case beforeToday
-    case afterToday
+    case disabledDate
+    case enabledDate
 }
 
 enum YFCalendarCellSelectionStyle {
@@ -25,7 +25,7 @@ enum YFCalendarCellSelectionStyle {
 class YFCalendarCell: UICollectionViewCell
 {
     
-    private var _dateTimeType: YFCalendarCellDateTimeType = .afterToday
+    private var _dateTimeType: YFCalendarCellDateTimeType = .enabledDate
     var dateTimeType: YFCalendarCellDateTimeType {
         get {
             return _dateTimeType
@@ -33,13 +33,13 @@ class YFCalendarCell: UICollectionViewCell
         set {
             _dateTimeType = newValue
             switch newValue {
-            case .beforeToday:
+            case .disabledDate:
                 self.dayLabel.textColor = UIColor.gray
                 
             case .isToday:
                 self.dayLabel.textColor = UIColor.red
                 
-            case .afterToday:
+            case .enabledDate:
                 self.dayLabel.textColor = UIColor.black
                 
             }

@@ -49,12 +49,12 @@
         _pdtCalendarViewController.weekdayTextType = PDTSimpleCalendarViewWeekdayTextTypeVeryShort;
         _pdtCalendarViewController.delegate = self;
         NSDateComponents *dateComponents = [NSDateComponents new];
-        [dateComponents setDay:1];
+        [dateComponents setDay:10];
         [dateComponents setMonth:2];
-        [dateComponents setYear:2015];
+        [dateComponents setYear:2017];
         NSDate *date = [[NSCalendar currentCalendar] dateFromComponents:dateComponents];
         _pdtCalendarViewController.firstDate = date;
-        _pdtCalendarViewController.lastDate = [NSDate date];
+        _pdtCalendarViewController.lastDate = [[NSDate date] dateByAddingTimeInterval:60*60*24*10];
     }
     return _pdtCalendarViewController;
 }
@@ -71,7 +71,7 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (IBAction)pushToPDTCalendarAction:(id)sender {    
+- (IBAction)pushToPDTCalendarAction:(id)sender {
     [self.navigationController pushViewController:self.pdtCalendarViewController animated:YES];
     
 }
@@ -80,6 +80,7 @@
     
     YFCalendarController *calendarController = [YFCalendarController new];
     calendarController.delegate = self;
+    calendarController.firstDate = [NSDate date];
     calendarController.startDate = self.date1;
     calendarController.endDate = self.date2;
     
@@ -92,7 +93,7 @@
     [self.navigationController pushViewController:self.testVC animated:YES];
 }
 
-- (void)yf_calendar:(YFCalendarController *)controller didFinishPickingDate:(NSDate *)startDate endDate:(NSDate *)endDate {
+- (BOOL)yf_calendardidFinishPickingDateWithStartDate:(NSDate *)startDate endDate:(NSDate *)endDate {
     NSDateFormatter *formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"yyyy mm dd"];
     
@@ -104,7 +105,7 @@
     self.date1 = startDate;
     self.date2 = endDate;
     
-    [controller.navigationController popViewControllerAnimated:YES];
+    return true;
 }
 
 @end
